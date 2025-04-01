@@ -1,0 +1,26 @@
+{
+  "name": "product-list",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bhdoggett/product-list.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bhdoggett/product-list/issues"
+  },
+  "homepage": "https://github.com/bhdoggett/product-list#readme",
+  "dependencies": {
+    "express": "^5.1.0",
+    "faker": "^5.5.3",
+    "mongoose": "^8.13.1"
+  },
+  "type": "module"
+}
