@@ -1,4 +1,5 @@
 import express from "express";
+import mongoose from "mongoose";
 import faker from "faker";
 import { Product, Review } from "../models/product.js";
 const router = express.Router();
@@ -8,7 +9,7 @@ router.get("/generate-fake-data", async (req, res, next) => {
     for (let i = 0; i < 90; i++) {
       let product = new Product();
       let reviews = await Promise.all(
-        Array.from({ length: 3 }, async () => {
+        Array.from({ length: 12 }, async () => {
           const review = new Review({
             userName: faker.internet.userName(),
             text: faker.lorem.sentence(),
@@ -56,6 +57,60 @@ router.get("/products", async (req, res, next) => {
     return res.status(200).json(pageOfProducts);
   } catch (err) {
     next(err);
+  }
+});
+
+router.get("/products/:productId", async (req, res, next) => {
+  try {
+    const { productId, page } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ message: "Invalid product ID format" });
+    }
+
+    const product = await Product.findById(productId);
+
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    return res.status(200).json(product);
+  } catch (err) {
+    console.error("Error fetching product:", err);
+    return res.status(500).json({ message: "Internal servor error" });
+  }
+});
+
+router.get("/products/:productId/reviews", async (req, res, next) => {
+  try {
+    const { productId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ message: "Invalid product ID format" });
+    }
+
+    const product = await Product.findById(productId);
+
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    const reviews = await Review.find({ _id: { $in: product.reviews } });
+
+    if (!reviews) return res.status(404).json({ message: "No reviews found" });
+
+    const page = parseInt(req.query.page);
+
+    if (page) {
+      const reviewsPerPage = 4;
+      const pagenatedReviews = await Review.find({
+        _id: { $in: product.reviews },
+      })
+        .skip((page - 1) * reviewsPerPage)
+        .limit(reviewsPerPage);
+      console.log("pagenatedReviews", pagenatedReviews);
+      return res.status(200).json(pagenatedReviews);
+    } else {
+      return res.status(200).json(reviews);
+    }
+  } catch (err) {
+    console.error(err);
   }
 });
 
