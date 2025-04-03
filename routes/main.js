@@ -1,6 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
-import faker from "faker";
+import { faker } from "@faker-js/faker";
 import { Product, Review } from "../models/product.js";
 const router = express.Router();
 
@@ -11,7 +11,7 @@ router.get("/generate-fake-data", async (req, res, next) => {
       let reviews = await Promise.all(
         Array.from({ length: 12 }, async () => {
           const review = new Review({
-            userName: faker.internet.userName(),
+            userName: faker.internet.username(),
             text: faker.lorem.sentence(),
             product: product._id,
           });
@@ -21,7 +21,9 @@ router.get("/generate-fake-data", async (req, res, next) => {
 
       product.category = faker.commerce.department();
       product.name = faker.commerce.productName();
-      product.price = faker.commerce.price();
+      product.price = parseFloat(
+        faker.commerce.price({ min: 1, max: 500, dec: 2 })
+      );
       product.image = "https://via.placeholder.com/250?text=Product+Image";
       product.reviews = reviews;
 
@@ -111,6 +113,31 @@ router.get("/products/:productId/reviews", async (req, res, next) => {
     }
   } catch (err) {
     console.error(err);
+  }
+});
+
+router.post("/products", async (req, res, next) => {
+  try {
+    const { category, name, price, image } = req.body;
+
+    if (!category || !name || !price || !image) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const product = new Product({
+      category,
+      name,
+      price: parseFloat(price),
+      image,
+      reviews: [],
+    });
+
+    await product.save();
+
+    return res.status(201).json(product);
+  } catch (err) {
+    console.error("Error posting product:", err);
+    return res.status(500).json({ message: "Internal servor error" });
   }
 });
 

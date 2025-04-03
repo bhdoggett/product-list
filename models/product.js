@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
+import { StringDecoder } from "string_decoder";
 
 const productSchema = new mongoose.Schema({
   category: { type: String, required: true },
   name: { type: String, required: true },
-  price: { type: String, required: true },
+  price: { type: Number, required: true },
   image: String,
   reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
 });
