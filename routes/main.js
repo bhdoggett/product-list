@@ -4,6 +4,21 @@ import { faker } from "@faker-js/faker";
 import { Product, Review } from "../models/product.js";
 const router = express.Router();
 
+// Middlware for routes that need to get a specific product
+const getProduct = async (req, res, next) => {
+  const { productId } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(productId)) {
+    return res.status(400).json({ message: "Invalid product ID format" });
+  }
+
+  const product = await Product.findById(req.params.productId);
+
+  if (!product) return res.status(404).json({ message: "Product not found" });
+
+  req.product = product;
+  next();
+};
+
 router.get("/generate-fake-data", async (req, res, next) => {
   try {
     for (let i = 0; i < 90; i++) {
@@ -62,59 +77,48 @@ router.get("/products", async (req, res, next) => {
   }
 });
 
-router.get("/products/:productId", async (req, res, next) => {
+router.get("/products/:productId", getProduct, async (req, res, next) => {
   try {
-    const { productId, page } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(productId)) {
-      return res.status(400).json({ message: "Invalid product ID format" });
-    }
-
-    const product = await Product.findById(productId);
+    const product = await Product.findById(req.params.productId);
 
     if (!product) return res.status(404).json({ message: "Product not found" });
 
     return res.status(200).json(product);
   } catch (err) {
-    console.error("Error fetching product:", err);
-    return res.status(500).json({ message: "Internal servor error" });
+    next(err);
   }
 });
 
-router.get("/products/:productId/reviews", async (req, res, next) => {
-  try {
-    const { productId } = req.params;
+router.get(
+  "/products/:productId/reviews",
+  getProduct,
+  async (req, res, next) => {
+    try {
+      const product = req.product;
 
-    if (!mongoose.Types.ObjectId.isValid(productId)) {
-      return res.status(400).json({ message: "Invalid product ID format" });
+      const reviews = await Review.find({ _id: { $in: product.reviews } });
+
+      if (!reviews)
+        return res.status(404).json({ message: "No reviews found" });
+
+      const page = parseInt(req.query.page);
+
+      if (page) {
+        const reviewsPerPage = 4;
+        const pagenatedReviews = await Review.find({
+          _id: { $in: product.reviews },
+        })
+          .skip((page - 1) * reviewsPerPage)
+          .limit(reviewsPerPage);
+        return res.status(200).json(pagenatedReviews);
+      } else {
+        return res.status(200).json(reviews);
+      }
+    } catch (err) {
+      next(err);
     }
-
-    const product = await Product.findById(productId);
-
-    if (!product) return res.status(404).json({ message: "Product not found" });
-
-    const reviews = await Review.find({ _id: { $in: product.reviews } });
-
-    if (!reviews) return res.status(404).json({ message: "No reviews found" });
-
-    const page = parseInt(req.query.page);
-
-    if (page) {
-      const reviewsPerPage = 4;
-      const pagenatedReviews = await Review.find({
-        _id: { $in: product.reviews },
-      })
-        .skip((page - 1) * reviewsPerPage)
-        .limit(reviewsPerPage);
-      console.log("pagenatedReviews", pagenatedReviews);
-      return res.status(200).json(pagenatedReviews);
-    } else {
-      return res.status(200).json(reviews);
-    }
-  } catch (err) {
-    console.error(err);
   }
-});
+);
 
 router.post("/products", async (req, res, next) => {
   try {
@@ -136,9 +140,26 @@ router.post("/products", async (req, res, next) => {
 
     return res.status(201).json(product);
   } catch (err) {
-    console.error("Error posting product:", err);
-    return res.status(500).json({ message: "Internal servor error" });
+    next(err);
   }
 });
+
+router.post(
+  "/products/:productId/reviews",
+  getProduct,
+  async (req, res, next) => {
+    try {
+      const product = req.product;
+
+      const review = new Review({
+        userName,
+        text,
+        product: mongoose.Types.ObjectId(req.params.productId),
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
 export default router;

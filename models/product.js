@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { StringDecoder } from "string_decoder";
 
 const productSchema = new mongoose.Schema({
   category: { type: String, required: true },
