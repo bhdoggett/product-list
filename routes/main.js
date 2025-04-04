@@ -40,28 +40,48 @@ router.get("/generate-fake-data", async (req, res, next) => {
   }
 });
 
-router.get("/products", validatePageFormat, async (req, res, next) => {
+router.get("/products", async (req, res, next) => {
   try {
-    // page is added to the request object by the validatePageFormat middleware.
-    const page = req.page;
+    const { page, category, search, price } = req.query;
+    const query = {};
+
+    // Apply filters
+    if (category) {
+      query.category = { $regex: category, $options: "i" };
+    }
+    if (search) {
+      query.name = { $regex: search, $options: "i" };
+    }
+
     const productsPerPage = 9;
+    const currentPage = parseInt(page) || 1;
+    const skip = (currentPage - 1) * productsPerPage;
+
+    // Sorting logic (only add if needed)
+    let sortStage = [];
+    if (price === "high") {
+      sortStage.push({ $sort: { price: -1 } });
+    } else if (price === "low") {
+      sortStage.push({ $sort: { price: 1 } });
+    }
 
     const result = await Product.aggregate([
+      { $match: query }, // Apply filters
+      ...sortStage, // Apply sorting if provided
       {
         $facet: {
-          data: [
-            { $skip: (page - 1) * productsPerPage },
-            { $limit: productsPerPage },
-          ],
+          data: [{ $skip: skip }, { $limit: productsPerPage }],
           totalCount: [{ $count: "count" }],
         },
       },
     ]);
 
+    // Extract paginated data & total count
     const pageOfProducts = result[0].data;
     const totalCount = result[0].totalCount[0]?.count || 0;
     const totalPages = Math.ceil(totalCount / productsPerPage);
 
+    // Check if page exists
     if (page > totalPages) {
       return res.status(404).json({ message: "Page not found" });
     }
