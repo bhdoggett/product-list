@@ -1,1 +1,67 @@
+# ----------------------
+# GENERAL IGNORE RULES
+# ----------------------
+
+# Dependencies
 node_modules/
+frontend/node_modules/
+backend/node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Testing
+coverage/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ----------------------
+# NEXT.JS FRONTEND
+# ----------------------
+
+# Next.js build output
+frontend/.next/
+frontend/out/
+
+# Production build
+frontend/build/
+
+# Next.js env files (opt-in if needed)
+frontend/.env*
+
+# Next.js specific files
+frontend/.vercel
+frontend/next-env.d.ts
+frontend/*.tsbuildinfo
+
+# ----------------------
+# EXPRESS BACKEND
+# ----------------------
+
+# Build output
+backend/dist/
+backend/build/
+
+# Backend env files
+backend/.env
+
+# Debugging
+backend/debug.log
+backend/.eslintcache
+
+# ----------------------
+# MISC
+# ----------------------
+
+.DS_Store
+*.pem
