@@ -2,22 +2,10 @@ import express from "express";
 import mongoose from "mongoose";
 import { faker } from "@faker-js/faker";
 import { Product, Review } from "../models/product.js";
+import validateProduct from "../middleware/validateProduct.js";
+import validatePageFormat from "../middleware/validatePageFormat.js";
+// import * as res from "express/lib/response";
 const router = express.Router();
-
-// Middlware for routes that need to get a specific product
-const getProduct = async (req, res, next) => {
-  const { productId } = req.params;
-  if (!mongoose.Types.ObjectId.isValid(productId)) {
-    return res.status(400).json({ message: "Invalid product ID format" });
-  }
-
-  const product = await Product.findById(req.params.productId);
-
-  if (!product) return res.status(404).json({ message: "Product not found" });
-
-  req.product = product;
-  next();
-};
 
 router.get("/generate-fake-data", async (req, res, next) => {
   try {
@@ -52,24 +40,31 @@ router.get("/generate-fake-data", async (req, res, next) => {
   }
 });
 
-router.get("/products", async (req, res, next) => {
+router.get("/products", validatePageFormat, async (req, res, next) => {
   try {
-    const page = parseInt(req.query.page);
-
-    if (isNaN(page) || page < 1) {
-      return res
-        .status(400)
-        .json({ message: "Valid 'page' parameter required" });
-    }
-
+    // page is added to the request object by the validatePageFormat middleware.
+    const page = req.page;
     const productsPerPage = 9;
-    const pageOfProducts = await Product.find()
-      .skip((page - 1) * productsPerPage)
-      .limit(productsPerPage)
-      .populate({
-        path: "reviews",
-        select: "userName text -_id",
-      });
+
+    const result = await Product.aggregate([
+      {
+        $facet: {
+          data: [
+            { $skip: (page - 1) * productsPerPage },
+            { $limit: productsPerPage },
+          ],
+          totalCount: [{ $count: "count" }],
+        },
+      },
+    ]);
+
+    const pageOfProducts = result[0].data;
+    const totalCount = result[0].totalCount[0]?.count || 0;
+    const totalPages = Math.ceil(totalCount / productsPerPage);
+
+    if (page > totalPages) {
+      return res.status(404).json({ message: "Page not found" });
+    }
 
     return res.status(200).json(pageOfProducts);
   } catch (err) {
@@ -77,11 +72,9 @@ router.get("/products", async (req, res, next) => {
   }
 });
 
-router.get("/products/:productId", getProduct, async (req, res, next) => {
+router.get("/products/:productId", validateProduct, async (req, res, next) => {
   try {
-    const product = await Product.findById(req.params.productId);
-
-    if (!product) return res.status(404).json({ message: "Product not found" });
+    const product = req.product;
 
     return res.status(200).json(product);
   } catch (err) {
@@ -91,29 +84,44 @@ router.get("/products/:productId", getProduct, async (req, res, next) => {
 
 router.get(
   "/products/:productId/reviews",
-  getProduct,
+  validateProduct,
+  validatePageFormat,
   async (req, res, next) => {
     try {
       const product = req.product;
 
-      const reviews = await Review.find({ _id: { $in: product.reviews } });
+      await product.populate({
+        path: "reviews",
+        select: "userName text",
+      });
 
-      if (!reviews)
+      const reviews = product.reviews;
+
+      if (reviews.length === 0)
         return res.status(404).json({ message: "No reviews found" });
 
-      const page = parseInt(req.query.page);
+      // page is added to the request object by the validatePageFormat middleware.
+      const page = req.page;
 
-      if (page) {
-        const reviewsPerPage = 4;
-        const pagenatedReviews = await Review.find({
-          _id: { $in: product.reviews },
-        })
-          .skip((page - 1) * reviewsPerPage)
-          .limit(reviewsPerPage);
-        return res.status(200).json(pagenatedReviews);
-      } else {
-        return res.status(200).json(reviews);
+      // If page is null
+      if (!page) return res.status(200).json(reviews);
+      const reviewsPerPage = 4;
+
+      // if page is greater than the required number of pages to display the results
+      if (page > Math.ceil(reviews.length / reviewsPerPage)) {
+        return res.status(404).json({ message: "Page not found" });
       }
+
+      const pagenatedReviews = reviews.slice(
+        (page - 1) * reviewsPerPage,
+        page * reviewsPerPage
+      );
+      // const pagenatedReviews = await Review.find({
+      //   _id: { $in: product.reviews },
+      // })
+      //   .skip((page - 1) * reviewsPerPage)
+      //   .limit(reviewsPerPage);
+      return res.status(200).json(pagenatedReviews);
     } catch (err) {
       next(err);
     }
@@ -146,20 +154,39 @@ router.post("/products", async (req, res, next) => {
 
 router.post(
   "/products/:productId/reviews",
-  getProduct,
+  validateProduct,
   async (req, res, next) => {
     try {
-      const product = req.product;
-
+      // const product = req.product;
+      const { userName, text } = req.body;
       const review = new Review({
         userName,
         text,
-        product: mongoose.Types.ObjectId(req.params.productId),
+        product: new mongoose.Types.ObjectId(req.params.productId),
       });
+
+      review.save();
+      await Product.findByIdAndUpdate(req.params.productId, {
+        $push: { reviews: review._id },
+      });
+
+      return res.status(201).json(review);
     } catch (err) {
       next(err);
     }
   }
 );
 
+router.delete(
+  "/products/:productId",
+  validateProduct,
+  async (req, res, next) => {
+    try {
+      await Product.deleteOne({ _id: req.product._id });
+      return res.status(200).json({ message: "Product deleted" });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 export default router;
