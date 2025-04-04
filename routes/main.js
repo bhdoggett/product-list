@@ -189,4 +189,26 @@ router.delete(
     }
   }
 );
+
+router.delete(
+  "/products/:productId/reviews/:reviewId",
+  validateProduct,
+  async (req, res, next) => {
+    try {
+      const review = await Review.findById(req.params.reviewId);
+
+      if (!review) return res.status(404).json({ message: "Review not found" });
+
+      await Product.findByIdAndUpdate(req.params.productId, {
+        $pull: { reviews: review._id },
+      });
+
+      await Review.deleteOne({ _id: review._id });
+
+      return res.status(200).json({ message: "Review deleted" });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 export default router;
