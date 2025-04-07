@@ -25,8 +25,8 @@ type QueryType = {
   search: string | null;
   category: string | null;
   price: string | null;
-  page: number;
-  string: string;
+  page: number | null;
+  string: string | null;
 };
 
 type ProductSliceState = {
@@ -38,11 +38,11 @@ type ProductSliceState = {
 
 const initialState: ProductSliceState = {
   query: {
-    search: "",
-    category: "",
-    price: "",
+    search: null,
+    category: null,
+    price: null,
     page: 1,
-    string: "",
+    string: null,
   },
   loading: false,
   error: null,

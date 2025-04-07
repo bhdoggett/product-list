@@ -1,17 +1,45 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAppDispatch, useAppSelector, useAppStore } from "../lib/hooks";
 import { useSearchParams } from "next/navigation";
-import { fetchProducts } from "../lib/products/products";
-import { Product } from "../lib/products/products";
+import {
+  fetchProducts,
+  setSearch,
+  setCategory,
+  setSortPrice,
+  updateQueryString,
+} from "../lib/products/products";
+import Product from "./product";
 
 const ProductsPage = () => {
-  const queryString = useSearchParams().toString();
+  const searchParams = useSearchParams();
+  const queryString = searchParams.toString();
+  const search = searchParams.get("search");
+  const category = searchParams.get("category");
+  const price = searchParams.get("price");
+  const page = searchParams.get("page");
   const dispatch = useAppDispatch();
   const { products, loading, error } = useAppSelector(
     (state) => state.products
   );
+
+  useEffect(() => {
+    if (search) {
+      dispatch(setSearch(search));
+    }
+    if (category) {
+      dispatch(setCategory(category));
+    }
+    if (price) {
+      dispatch(setSortPrice(price));
+    }
+    if (page) {
+      dispatch(setSortPrice(page));
+    }
+    dispatch(updateQueryString());
+  }, [search, category, price, page, dispatch]);
 
   useEffect(() => {
     dispatch(fetchProducts(`${queryString}?${queryString}`));
@@ -30,12 +58,6 @@ const ProductsPage = () => {
       <h1>Products page</h1>
       {products.map((product) => (
         <Product key={product._id} product={product} />
-        // <div key={product._id}>
-        //   <h6>Category: {product.category}</h6>
-        //   <h3>{product.price}</h3>
-        //   <p>{product.image}</p>
-        //   <h1>{product.name}</h1>
-        // </div>
       ))}
     </div>
   );
