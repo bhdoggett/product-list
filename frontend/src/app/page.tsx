@@ -1,17 +1,13 @@
-// "use client";
-// import { useRouter } from "next/navigation";
-// import { useEffect } from "react";
+"use client";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Home() {
-  // const router = useRouter();
+  const router = useRouter();
 
-  // useEffect(() => {
-  //   router.push("/products");
-  // }, [router]);
+  useEffect(() => {
+    router.push("/products?page=1");
+  }, [router]);
 
-  return (
-    <div>
-      <h1>hello world</h1>
-    </div>
-  );
+  return null;
 }

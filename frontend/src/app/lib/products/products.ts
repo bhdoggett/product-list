@@ -1,10 +1,13 @@
 import axios from "axios";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-export const fetchProducts = createAsyncThunk(
+//creatAsyncThunk with type
+export const fetchProducts = createAsyncThunk<Product[], string>(
   "products/fetchProducts",
-  async (baseUrl, query) => {
-    const response = await axios.get(`${baseUrl}/products?${query}`);
+  async (url) => {
+    const response = await axios.get(
+      `${process.env.NEXT_PUBLIC_API_URL}/products?${url}`
+    );
     return response.data;
   }
 );
@@ -14,15 +17,28 @@ type Product = {
   name: string;
   price: number;
   category: string;
+  image: string;
+};
+
+type QueryType = {
+  search: string | null;
+  category: string | null;
+  page: number;
 };
 
 type ProductSliceState = {
+  query: QueryType;
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
   products: Product[];
 };
 
 const initialState: ProductSliceState = {
+  query: {
+    search: "",
+    category: "",
+    page: 1,
+  },
   status: "idle",
   error: null,
   products: [],
@@ -31,7 +47,14 @@ const initialState: ProductSliceState = {
 export const productsSlice = createSlice({
   name: "products",
   initialState,
-  reducers: {},
+  reducers: {
+    setSearch: (state, action) => {
+      state.query = action.payload;
+    },
+    setCategory: (state, action) => {
+      state.category = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchProducts.pending, (state) => {
