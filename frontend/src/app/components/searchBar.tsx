@@ -1,28 +1,31 @@
 "use client";
 import { useState } from "react";
-import { setQuery } from "../lib/products/products";
-import { useAppDispatch } from "../lib/hooks";
+import { useRouter } from "next/navigation";
+import { setSearch, updateQueryString } from "../lib/products/products";
+import { useAppDispatch, useAppSelector } from "../lib/hooks";
 
 const SearchBar = () => {
-  const [queryString, setQueryString] = useState<string>("");
+  const [searchString, setSearchString] = useState<string>("");
   const dispatch = useAppDispatch();
+  const router = useRouter();
+  const queryString = useAppSelector((state) => state.products.query.string);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    dispatch(setQuery(query));
+    dispatch(setSearch(searchString));
+    dispatch(updateQueryString());
+    router.push(`/products?${queryString}`);
   };
 
   return (
-    <div>
+    <div className="border rounded-sm border-black bg-gray-100 p-1">
       <form action="submit" onSubmit={handleSubmit}>
-        <label htmlFor="search">Search</label>
         <input
           type="text"
           placeholder="Search..."
-          value={queryString}
-          onChange={(e) => setQueryString(e.target.value)}
+          value={searchString}
+          onChange={(e) => setSearchString(e.target.value)}
         ></input>
-        <button>Submit</button>
       </form>
     </div>
   );

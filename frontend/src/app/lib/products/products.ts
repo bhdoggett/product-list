@@ -1,5 +1,6 @@
 import axios from "axios";
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { truncate } from "fs";
 
 //creatAsyncThunk with type
 export const fetchProducts = createAsyncThunk<Product[], string>(
@@ -13,7 +14,7 @@ export const fetchProducts = createAsyncThunk<Product[], string>(
 );
 
 type Product = {
-  id: string;
+  _id: string;
   name: string;
   price: number;
   category: string;
@@ -23,12 +24,14 @@ type Product = {
 type QueryType = {
   search: string | null;
   category: string | null;
+  price: string | null;
   page: number;
+  string: string;
 };
 
 type ProductSliceState = {
   query: QueryType;
-  status: "idle" | "loading" | "succeeded" | "failed";
+  loading: boolean;
   error: string | null;
   products: Product[];
 };
@@ -37,9 +40,11 @@ const initialState: ProductSliceState = {
   query: {
     search: "",
     category: "",
+    price: "",
     page: 1,
+    string: "",
   },
-  status: "idle",
+  loading: false,
   error: null,
   products: [],
 };
@@ -48,27 +53,49 @@ export const productsSlice = createSlice({
   name: "products",
   initialState,
   reducers: {
-    setSearch: (state, action) => {
-      state.query = action.payload;
+    setSearch: (state, action: PayloadAction<string>) => {
+      state.query.search = action.payload;
     },
-    setCategory: (state, action) => {
-      state.category = action.payload;
+    setCategory: (state, action: PayloadAction<string>) => {
+      state.query.category = action.payload;
+    },
+    setSortPrice: (state, action: PayloadAction<string>) => {
+      state.query.price = action.payload;
+    },
+    updateQueryString: (state) => {
+      const { search, category, sortPrice, page } = state.query;
+      const queryParts = [];
+      if (search) {
+        queryParts.push(`search=${search}`);
+      }
+      if (category) {
+        queryParts.push(`category=${category}`);
+      }
+      if (sortPrice) {
+        queryParts.push(`sortPrice=${sortPrice}`);
+      }
+      if (page) {
+        queryParts.push(`page=${page}`);
+      }
+      state.query.string = queryParts.join("&");
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchProducts.pending, (state) => {
-        state.status = "loading";
+        state.loading = true;
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
-        state.status = "succeeded";
+        state.loading = false;
         state.products = action.payload;
       })
       .addCase(fetchProducts.rejected, (state, action) => {
-        state.status = "failed";
+        state.loading = false;
         state.error = action.error.message ?? "An error occured";
       });
   },
 });
 
+export const { setSearch, setCategory, setSortPrice, updateQueryString } =
+  productsSlice.actions;
 export default productsSlice.reducer;
