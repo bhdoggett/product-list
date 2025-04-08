@@ -1,18 +1,15 @@
 "use client";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import {
   setSearch,
   setPage,
   updateQueryString,
 } from "../lib/products/products";
-import { useAppDispatch, useAppSelector } from "../lib/hooks";
+import { useAppDispatch } from "../lib/hooks";
 
 const SearchBar = () => {
   const [searchString, setSearchString] = useState<string>("");
   const dispatch = useAppDispatch();
-  const router = useRouter();
-  const queryString = useAppSelector((state) => state.products.query.string);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

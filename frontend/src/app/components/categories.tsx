@@ -1,6 +1,5 @@
 "use client";
-import { use, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../lib/hooks";
 import {
   fetchCategories,
@@ -11,11 +10,9 @@ import {
 
 export const Categories = () => {
   const dispatch = useAppDispatch();
-  const router = useRouter();
   const categories = useAppSelector((state) => state.products.categories);
   const [selectedCategory, setSelectedcategory] =
     useState<string>("All Categories");
-  const queryString = useAppSelector((state) => state.products.query.string);
 
   useEffect(() => {
     dispatch(fetchCategories());
