@@ -54,8 +54,8 @@ router.get("/products", async (req, res, next) => {
     }
 
     const productsPerPage = 9;
-    const currentPage = parseInt(page) || 1;
-    const skip = (currentPage - 1) * productsPerPage;
+    const queryPage = parseInt(page) || 1;
+    const skip = (queryPage - 1) * productsPerPage;
 
     // Sorting logic (only add if needed)
     let sortStage = [];
@@ -77,7 +77,7 @@ router.get("/products", async (req, res, next) => {
     ]);
 
     // Extract paginated data & total count
-    const pageOfProducts = result[0].data;
+    const currentPage = result[0].data;
     const totalCount = result[0].totalCount[0]?.count || 0;
     const totalPages = Math.ceil(totalCount / productsPerPage);
 
@@ -86,7 +86,7 @@ router.get("/products", async (req, res, next) => {
       return res.status(404).json({ message: "Page not found" });
     }
 
-    return res.status(200).json(pageOfProducts);
+    return res.status(200).json({ currentPage, totalPages });
   } catch (err) {
     next(err);
   }
