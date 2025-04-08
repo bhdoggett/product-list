@@ -12,11 +12,11 @@ import Image from "next/image";
 const Product = ({ product }) => {
   return (
     <div
-      className="flex flex-col justify-between m-4 w-70 h-70
+      className="flex flex-col justify-between m-4 p-1 w-50 h-50
      border border-black bg-gray-300"
     >
       <div className="flex justify-between">
-        <p className="text-sm">Category: {product.category}</p>
+        <p className="text-xs">Category: {product.category}</p>
         <p className="text-lg font-bold">{product.price}</p>
       </div>
       <img
@@ -24,7 +24,7 @@ const Product = ({ product }) => {
         alt="Image not Found"
         className="flex justify-center"
       />
-      <h1 className="flex justify-center text-2xl font-bold">{product.name}</h1>
+      <h1 className="flex justify-center text-xl font-bold">{product.name}</h1>
     </div>
   );
 };

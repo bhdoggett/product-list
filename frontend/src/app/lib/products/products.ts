@@ -1,39 +1,23 @@
 import axios from "axios";
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { truncate } from "fs";
+import { Product, ProductsResponse, QueryType } from "./productTypes";
 
-//creatAsyncThunk with type
-export const fetchProducts = createAsyncThunk<Product[], string>(
+//This returns an object with two properties: currentPage and totalProductCount
+export const fetchProducts = createAsyncThunk<ProductsResponse, string>(
   "products/fetchProducts",
-  async (url) => {
+  async (queryString) => {
     const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}/products?${url}`
+      `${process.env.NEXT_PUBLIC_API_URL}/products?${queryString}`
     );
     return response.data;
   }
 );
 
-type Product = {
-  _id: string;
-  name: string;
-  price: number;
-  category: string;
-  image: string;
-};
-
-type QueryType = {
-  search: string | null;
-  category: string | null;
-  price: string | null;
-  page: number | null;
-  string: string | null;
-};
-
 type ProductSliceState = {
   query: QueryType;
   loading: boolean;
   error: string | null;
-  products: Product[];
+  products: { currentPage: Product[]; totalPages: number } | null;
 };
 
 const initialState: ProductSliceState = {
@@ -46,24 +30,27 @@ const initialState: ProductSliceState = {
   },
   loading: false,
   error: null,
-  products: [],
+  products: null,
 };
 
 export const productsSlice = createSlice({
   name: "products",
   initialState,
   reducers: {
-    setSearch: (state, action: PayloadAction<string>) => {
+    setSearch: (state, action: PayloadAction<string | null>) => {
       state.query.search = action.payload;
     },
-    setCategory: (state, action: PayloadAction<string>) => {
+    setCategory: (state, action: PayloadAction<string | null>) => {
       state.query.category = action.payload;
     },
-    setSortPrice: (state, action: PayloadAction<string>) => {
+    setSortPrice: (state, action: PayloadAction<string | null>) => {
       state.query.price = action.payload;
     },
+    setPage: (state, action: PayloadAction<number>) => {
+      state.query.page = action.payload;
+    },
     updateQueryString: (state) => {
-      const { search, category, sortPrice, page } = state.query;
+      const { search, category, price, page } = state.query;
       const queryParts = [];
       if (search) {
         queryParts.push(`search=${search}`);
@@ -71,8 +58,8 @@ export const productsSlice = createSlice({
       if (category) {
         queryParts.push(`category=${category}`);
       }
-      if (sortPrice) {
-        queryParts.push(`sortPrice=${sortPrice}`);
+      if (price) {
+        queryParts.push(`price=${price}`);
       }
       if (page) {
         queryParts.push(`page=${page}`);
@@ -96,6 +83,11 @@ export const productsSlice = createSlice({
   },
 });
 
-export const { setSearch, setCategory, setSortPrice, updateQueryString } =
-  productsSlice.actions;
+export const {
+  setSearch,
+  setCategory,
+  setSortPrice,
+  setPage,
+  updateQueryString,
+} = productsSlice.actions;
 export default productsSlice.reducer;

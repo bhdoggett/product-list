@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "../lib/hooks";
@@ -7,6 +6,7 @@ import { setCategory, updateQueryString } from "../lib/products/products";
 
 export const Categories = () => {
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const categories = [
     "All",
     "Electronics",
@@ -24,15 +24,22 @@ export const Categories = () => {
     "Jewelry",
   ];
   const [selectedCategory, setSelectedcategory] = useState<string>("All");
-  const router = useRouter();
   const queryString = useAppSelector((state) => state.products.query.string);
+
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const category = e.target.value;
     setSelectedcategory(category);
-    dispatch(setCategory(category));
+    if (category === "All") {
+      dispatch(setCategory(null));
+    } else {
+      dispatch(setCategory(category));
+    }
     dispatch(updateQueryString());
-    router.push(`/products?${queryString}`);
   };
+
+  useEffect(() => {
+    router.push(`/products?${queryString}`);
+  }, [router, queryString]);
 
   return (
     <div className="border rounded-sm border-black bg-gray-400 p-1">
@@ -43,7 +50,7 @@ export const Categories = () => {
         defaultValue=""
       >
         <option value="" disabled>
-          Category
+          Sort by category
         </option>
         {categories.map((category) => {
           return (
