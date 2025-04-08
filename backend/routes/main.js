@@ -9,7 +9,9 @@ const router = express.Router();
 
 router.get("/generate-fake-data", async (req, res, next) => {
   try {
-    for (let i = 0; i < 90; i++) {
+    const number = parseInt(req.query.number) || 100;
+
+    for (let i = 0; i < number; i++) {
       let product = new Product();
       let reviews = await Promise.all(
         Array.from({ length: 12 }, async () => {
@@ -34,7 +36,10 @@ router.get("/generate-fake-data", async (req, res, next) => {
         if (err) throw err;
       });
     }
-    return res.status(200).json({ message: "Fake data added to database" });
+    return res.status(200).json({
+      message: "Fake data added to database",
+      numberAdded: number || 100,
+    });
   } catch (err) {
     console.error(err);
   }
@@ -87,6 +92,16 @@ router.get("/products", async (req, res, next) => {
     }
 
     return res.status(200).json({ currentPage, totalPages });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get("/products/categories", async (req, res, next) => {
+  try {
+    const categories = await Product.distinct("category");
+
+    return res.status(200).json(categories);
   } catch (err) {
     next(err);
   }

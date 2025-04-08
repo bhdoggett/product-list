@@ -30,6 +30,16 @@ const ProductsPage = () => {
     (state) => state.products
   );
 
+  // check product state
+  useEffect(() => {
+    console.log("products:", products);
+  }, [products]);
+
+  // handle funciton for pagination
+  const handlePageChange = (newPage: number) => {
+    dispatch(setPage(newPage));
+    dispatch(updateQueryString());
+  };
   //test querystring
   useEffect(() => {
     console.log(queryStringFromStore);
@@ -68,11 +78,31 @@ const ProductsPage = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen mt-5">
       <h1 className="text-2xl">Products page</h1>
-      <div className="grid grid-cols-3 gap-1 w-60%">
+
+      <div className="grid grid-cols-3 gap-1 w-[60%]">
         {products?.currentPage.map((product) => (
           <Product key={product._id} product={product} />
         ))}
       </div>
+
+      {products && products.totalPages && (
+        <div className="flex flex-wrap items-center space-x-2 mt-4 text-sm text-gray-700 w-[60%]">
+          <span className="font-bold">Page:</span>
+          {Array.from({ length: products.totalPages }, (_, i) => i + 1).map(
+            (pageNumber, idx) => (
+              <button
+                key={pageNumber}
+                onClick={() => handlePageChange(pageNumber)}
+                className={`text-blue-600 hover:underline cursor-pointer ${
+                  idx !== 0 ? "pl-2 border-l border-gray-300" : ""
+                }`}
+              >
+                {pageNumber}
+              </button>
+            )
+          )}
+        </div>
+      )}
     </div>
   );
 };

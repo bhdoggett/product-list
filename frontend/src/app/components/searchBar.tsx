@@ -1,7 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { setSearch, updateQueryString } from "../lib/products/products";
+import {
+  setSearch,
+  setPage,
+  updateQueryString,
+} from "../lib/products/products";
 import { useAppDispatch, useAppSelector } from "../lib/hooks";
 
 const SearchBar = () => {
@@ -16,6 +20,8 @@ const SearchBar = () => {
       dispatch(setSearch(null));
     } else {
       dispatch(setSearch(searchString));
+      dispatch(setPage(1));
+      setSearchString("");
     }
     dispatch(updateQueryString());
   };

@@ -2,7 +2,7 @@ import axios from "axios";
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { Product, ProductsResponse, QueryType } from "./productTypes";
 
-//This returns an object with two properties: currentPage and totalProductCount
+//This returns an object with two properties: currentPage and totalPages
 export const fetchProducts = createAsyncThunk<ProductsResponse, string>(
   "products/fetchProducts",
   async (queryString) => {
@@ -13,11 +13,23 @@ export const fetchProducts = createAsyncThunk<ProductsResponse, string>(
   }
 );
 
+//Fetch all distinct product categories in database
+export const fetchCategories = createAsyncThunk<string[]>(
+  "products/fetchCategories",
+  async () => {
+    const response = await axios.get(
+      `${process.env.NEXT_PUBLIC_API_URL}/products/categories`
+    );
+    return response.data;
+  }
+);
+
 type ProductSliceState = {
   query: QueryType;
   loading: boolean;
   error: string | null;
   products: { currentPage: Product[]; totalPages: number } | null;
+  categories: string[] | null;
 };
 
 const initialState: ProductSliceState = {
@@ -31,6 +43,7 @@ const initialState: ProductSliceState = {
   loading: false,
   error: null,
   products: null,
+  categories: null,
 };
 
 export const productsSlice = createSlice({
@@ -69,6 +82,7 @@ export const productsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // fetchProducts
       .addCase(fetchProducts.pending, (state) => {
         state.loading = true;
       })
@@ -78,6 +92,17 @@ export const productsSlice = createSlice({
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.error.message ?? "An error occured";
+      })
+
+      // fetchCategores
+      .addCase(fetchCategories.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchCategories.fulfilled, (state, action) => {
+        state.categories = ["All Categories", ...action.payload];
+      })
+      .addCase(fetchCategories.rejected, (state, action) => {
         state.error = action.error.message ?? "An error occured";
       });
   },
