@@ -29,6 +29,9 @@ const ProductsPage = () => {
   const { products, loading, error } = useAppSelector(
     (state) => state.products
   );
+  const selectedCategory = useAppSelector(
+    (state) => state.products.query.category
+  );
 
   // check product state
   useEffect(() => {
@@ -77,7 +80,17 @@ const ProductsPage = () => {
   }
   return (
     <div className="flex flex-col items-center justify-center min-h-screen mt-5">
-      <h1 className="text-2xl">Products page</h1>
+      <h1 className="text-6xl font-bold">
+        Awesome
+        {selectedCategory ? (
+          <span className="text-2xl italic align-middle">
+            {` [${selectedCategory}] `}
+          </span>
+        ) : (
+          " "
+        )}
+        Products
+      </h1>
 
       <div className="grid grid-cols-3 gap-1 w-[60%]">
         {products?.currentPage.map((product) => (
