@@ -17,10 +17,6 @@ export const PriceSort = () => {
     dispatch(updateQueryString());
   };
 
-  useEffect(() => {
-    router.push(`/products?${queryString}`);
-  }, [router, queryString]);
-
   return (
     <div className="border rounded-sm border-black bg-gray-400 p-1">
       <select

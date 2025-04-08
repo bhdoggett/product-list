@@ -26,9 +26,6 @@ const SearchBar = () => {
     dispatch(updateQueryString());
   };
 
-  useEffect(() => {
-    router.push(`/products?${queryString}`);
-  }, [router, queryString]);
   return (
     <div className="border rounded-sm border-black bg-gray-100 p-1">
       <form action="submit" onSubmit={handleSubmit}>
