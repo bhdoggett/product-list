@@ -35,7 +35,7 @@ const Products = () => {
         <Categories />
         <PriceSort />
         <button
-          className="border rounded-sm border-black bg-gray-700 p-1 text-gray-100"
+          className="border rounded-sm border-black bg-gray-500 p-1 text-gray-100"
           onClick={handleReset}
         >
           Reset

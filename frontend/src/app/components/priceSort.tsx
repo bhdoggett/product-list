@@ -15,12 +15,13 @@ export const PriceSort = () => {
   };
 
   return (
-    <div className="border rounded-sm border-black bg-gray-400 p-1">
+    <div className="border rounded-sm border-black bg-gray-300 p-1">
       <select
         name="categories"
         id="categories"
         onChange={handleSortChange}
         defaultValue=""
+        className="focus:outline-none focus:ring-0"
       >
         <option value="" disabled>
           Sort by price

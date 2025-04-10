@@ -24,13 +24,14 @@ const SearchBar = () => {
   };
 
   return (
-    <div className="border rounded-sm border-black bg-gray-100 p-1 w-80">
+    <div className="border rounded-sm border-black bg-gray-100 p-1">
       <form action="submit" onSubmit={handleSubmit}>
         <input
           type="text"
           placeholder="Search..."
           value={searchString}
           onChange={(e) => setSearchString(e.target.value)}
+          className="focus:outline-none focus:ring-0 w-80"
         ></input>
       </form>
     </div>
