@@ -78,6 +78,7 @@ const ProductsPage = () => {
   if (error) {
     return <div>Error: {error}</div>;
   }
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen mt-5">
       <h1 className="text-6xl font-bold">
@@ -99,16 +100,14 @@ const ProductsPage = () => {
       </div>
 
       {products && products.totalPages && (
-        <div className="flex flex-wrap items-center space-x-2 mt-4 text-sm text-gray-700 w-[60%]">
+        <div className="flex flex-wrap border bg-white items-center justify-center space-x-2 mx-auto text-sm text-gray-700 w-[40%] shadow-2xl shadow-gray-700">
           <span className="font-bold">Page:</span>
           {Array.from({ length: products.totalPages }, (_, i) => i + 1).map(
             (pageNumber, idx) => (
               <button
                 key={pageNumber}
                 onClick={() => handlePageChange(pageNumber)}
-                className={`text-blue-600 hover:underline cursor-pointer ${
-                  idx !== 0 ? "pl-2 border-l border-gray-300" : ""
-                }`}
+                className={`text-cyan-600 hover:underline cursor-pointer mx-1.5 ${pageNumber === page ? "font-bold" : ""}`}
               >
                 {pageNumber}
               </button>

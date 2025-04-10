@@ -12,8 +12,8 @@ import Image from "next/image";
 const Product = ({ product }) => {
   return (
     <div
-      className="flex flex-col justify-between m-4 p-1 w-50 h-50
-     border border-black bg-gray-300"
+      className="flex flex-col justify-between m-4 p-1 w-50 h-70
+     border border-black bg-white shadow-2xl shadow-gray-700"
     >
       <div className="flex justify-between">
         <p className="text-xs">Category: {product.category}</p>
@@ -22,7 +22,7 @@ const Product = ({ product }) => {
       <img
         src={product.image}
         alt="Image not Found"
-        className="flex justify-center"
+        className="flex w-45 h-45 object-contain mx-auto border border rounded-sm"
       />
       <h1 className="flex justify-center text-xl font-bold">{product.name}</h1>
     </div>

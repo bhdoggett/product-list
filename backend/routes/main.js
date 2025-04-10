@@ -29,7 +29,7 @@ router.get("/generate-fake-data", async (req, res, next) => {
       product.price = parseFloat(
         faker.commerce.price({ min: 1, max: 500, dec: 2 })
       );
-      product.image = "https://via.placeholder.com/250?text=Product+Image";
+      product.image = `https://placehold.co/300x300/8E8E8E/FFF?text=This+is+an+\nAWESOME+\nProduct`;
       product.reviews = reviews;
 
       product.save().catch((err) => {

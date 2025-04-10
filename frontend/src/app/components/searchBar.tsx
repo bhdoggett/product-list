@@ -24,7 +24,7 @@ const SearchBar = () => {
   };
 
   return (
-    <div className="border rounded-sm border-black bg-gray-100 p-1">
+    <div className="border rounded-sm border-black bg-gray-100 p-1 w-80">
       <form action="submit" onSubmit={handleSubmit}>
         <input
           type="text"
