@@ -32,7 +32,7 @@ router.get("/generate-fake-data", async (req, res, next) => {
       product.image = `https://placehold.co/300x300/8E8E8E/FFF?text=This+is+an+\nAWESOME+\nProduct`;
       product.reviews = reviews;
 
-      product.save().catch((err) => {
+      await product.save().catch((err) => {
         if (err) throw err;
       });
     }
@@ -188,7 +188,7 @@ router.post(
         product: new mongoose.Types.ObjectId(req.params.productId),
       });
 
-      review.save();
+      await review.save();
       await Product.findByIdAndUpdate(req.params.productId, {
         $push: { reviews: review._id },
       });
