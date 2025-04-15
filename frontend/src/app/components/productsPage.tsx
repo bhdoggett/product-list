@@ -103,7 +103,7 @@ const ProductsPage = () => {
         <div className="flex flex-wrap border bg-white items-center justify-center space-x-2 mx-auto text-sm text-gray-700 w-[40%] shadow-2xl shadow-gray-700">
           <span className="font-bold">Page:</span>
           {Array.from({ length: products.totalPages }, (_, i) => i + 1).map(
-            (pageNumber, idx) => (
+            (pageNumber) => (
               <button
                 key={pageNumber}
                 onClick={() => handlePageChange(pageNumber)}

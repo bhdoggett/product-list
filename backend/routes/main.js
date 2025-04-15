@@ -62,28 +62,16 @@ router.get("/products", async (req, res, next) => {
     const queryPage = parseInt(page) || 1;
     const skip = (queryPage - 1) * productsPerPage;
 
-    // Sorting logic (only add if needed)
-    let sortStage = [];
-    if (price === "high") {
-      sortStage.push({ $sort: { price: -1 } });
-    } else if (price === "low") {
-      sortStage.push({ $sort: { price: 1 } });
-    }
+    const currentPage = await Product.find(query)
+      // Sort products if price exists in query
+      .sort(
+        price === "high" ? { price: -1 } : price === "low" ? { price: 1 } : {}
+      )
+      .skip(skip)
+      .limit(productsPerPage);
 
-    const result = await Product.aggregate([
-      { $match: query }, // Apply filters
-      ...sortStage, // Apply sorting if provided
-      {
-        $facet: {
-          data: [{ $skip: skip }, { $limit: productsPerPage }],
-          totalCount: [{ $count: "count" }],
-        },
-      },
-    ]);
+    const totalCount = await Product.countDocuments(query);
 
-    // Extract paginated data & total count
-    const currentPage = result[0].data;
-    const totalCount = result[0].totalCount[0]?.count || 0;
     const totalPages = Math.ceil(totalCount / productsPerPage);
 
     // Check if page exists
