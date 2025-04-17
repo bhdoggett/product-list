@@ -4,7 +4,6 @@ import { faker } from "@faker-js/faker";
 import { Product, Review } from "../models/product.js";
 import validateProduct from "../middleware/validateProduct.js";
 import validatePageFormat from "../middleware/validatePageFormat.js";
-// import * as res from "express/lib/response";
 const router = express.Router();
 
 router.get("/generate-fake-data", async (req, res, next) => {
