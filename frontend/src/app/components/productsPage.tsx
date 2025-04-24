@@ -33,20 +33,11 @@ const ProductsPage = () => {
     (state) => state.products.query.category
   );
 
-  // check product state
-  useEffect(() => {
-    console.log("products:", products);
-  }, [products]);
-
   // handle funciton for pagination
   const handlePageChange = (newPage: number) => {
     dispatch(setPage(newPage));
     dispatch(updateQueryString());
   };
-  //test querystring
-  useEffect(() => {
-    console.log(queryStringFromStore);
-  }, [queryStringFromStore]);
 
   useEffect(() => {
     if (search) {
