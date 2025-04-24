@@ -2,13 +2,13 @@ import axios from "axios";
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { Product, ProductsResponse, QueryType } from "./productTypes";
 
+const BASE_PATH = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 //This returns an object with two properties: currentPage and totalPages
 export const fetchProducts = createAsyncThunk<ProductsResponse, string>(
   "products/fetchProducts",
   async (queryString) => {
-    const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}/products?${queryString}`
-    );
+    const response = await axios.get(`${BASE_PATH}/products?${queryString}`);
     return response.data;
   }
 );
@@ -17,9 +17,7 @@ export const fetchProducts = createAsyncThunk<ProductsResponse, string>(
 export const fetchCategories = createAsyncThunk<string[]>(
   "products/fetchCategories",
   async () => {
-    const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}/products/categories`
-    );
+    const response = await axios.get(`${BASE_PATH}/products/categories`);
     return response.data;
   }
 );
